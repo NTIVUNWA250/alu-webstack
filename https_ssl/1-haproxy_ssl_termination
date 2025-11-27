@@ -36,9 +36,9 @@ defaults
 frontend www-https
         bind *:443 ssl crt /etc/haproxy/certs/www.rentivunwa250.tech.pem
         http-request set-header X-Forwarded-Proto https
-        default_backend web-backend
+        default_backend web-servers
 
-backend web-backend
+backend web-servers
         balance roundrobin
-        server web-01 44.201.205.10:80 check
+        server web-01 44.211.160.158:80 check
         server web-02 18.233.224.78:80 check
