@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+set -e
+set -o pipefail
+
+# Update system and install HAProxy
+sudo apt-get update -y
+sudo apt-get install haproxy -y
+sudo systemctl stop nginx
+# Configure HAProxy
+sudo tee /etc/haproxy/haproxy.cfg > /dev/null <<'EOF'
 global
         log /dev/log    local0
         log /dev/log    local1 notice
@@ -8,6 +17,7 @@ global
         user haproxy
         group haproxy
         daemon
+	tune.ssl.default-dh-param 4096
 
         # Default SSL material locations
         ca-base /etc/ssl/certs
@@ -41,9 +51,14 @@ frontend www-http
 frontend www-https
         bind *:443 ssl crt /etc/haproxy/certs/www.rentivunwa250.tech.pem
         http-request set-header X-Forwarded-Proto https
-        default_backend web-backend
+        default_backend web-servers
 
-backend web-backend
+backend web-servers
         balance roundrobin
-        server web-01 44.201.205.10:80 check
+        server web-01 44.211.160.158:80 check
         server web-02 18.233.224.78:80 check
+EOF
+# Restart HAProxy to apply changes
+sudo service haproxy restart
+sudo systemctl stop nginx
+sudo systemctl disable nginx

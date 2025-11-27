@@ -1,3 +1,21 @@
+#!/usr/bin/env bash
+# Install and configure HAProxy on lb-01
+# Requirements:
+# - Send traffic to web-01 and web-02
+# - Use roundrobin algorithm
+# - Manage HAProxy via init script
+# - Servers must have hostnames: [STUDENT_ID]-web-01 and [STUDENT_ID]-web-02
+set -e
+set -o pipefail
+
+# Update system and install HAProxy
+sudo apt-get update -y
+sudo systemctl stop nginx
+
+# Configure HAProxy
+sudo tee /etc/haproxy/haproxy.cfg > /dev/null <<'EOF'
+# Global settings
+
 global
         log /dev/log    local0
         log /dev/log    local1 notice
@@ -7,6 +25,7 @@ global
         user haproxy
         group haproxy
         daemon
+	tune.ssl.default-dh-param 4096
 
         # Default SSL material locations
         ca-base /etc/ssl/certs
@@ -42,3 +61,9 @@ backend web-servers
         balance roundrobin
         server web-01 44.211.160.158:80 check
         server web-02 18.233.224.78:80 check
+EOF
+
+# Restart HAProxy to apply changes
+sudo service haproxy restart
+sudo systemctl stop nginx
+sudo systemctl disable nginx
