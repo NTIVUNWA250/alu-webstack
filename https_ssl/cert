@@ -1,0 +1,17 @@
+#!/usr/bin/env bash 
+
+sudo apt update
+sudo apt install certbot -y
+sudo apt install python3-certbot-nginx -y
+
+sudo certbot certonly --standalone -d www.rentivunwa250.tech
+
+
+sudo cat /etc/letsencrypt/live/www.rentivunwa250.tech/fullchain.pem \
+         /etc/letsencrypt/live/www.rentivunwa250.tech/privkey.pem \
+    | sudo tee /etc/haproxy/certs/www.rentivunwa250.tech.pem
+
+
+sudo chmod 600 /etc/haproxy/certs/www.rentivunwa250.tech.pem
+sudo chown haproxy:haproxy /etc/haproxy/certs/www.rentivunwa250.tech.pem
+
